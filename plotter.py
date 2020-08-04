@@ -37,6 +37,8 @@ class plotter:
         self.curr_color       = 'b'
         self.curr_color_index = 0
         self.plot_queue       = []
+        self.vis_until        = param['vis_until']
+        self.useTex           = param['useTex']
 
         self.create_figs()
         self.update_figs()
@@ -213,15 +215,16 @@ class plotter:
             Creates the figures with the given parameters
         """
 
-        #Use latex
-        rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
-        rc('text', usetex=True)
-        mpl.rcParams['figure.dpi'] = 300
+        if self.useTex == True:
+            #Use latex
+            rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+            rc('text', usetex=True)
+            mpl.rcParams['figure.dpi'] = 300
 
 
         self.fig_list = []
         self.ax_list  = []
-        for i in range(self.nFig):
+        for i in range(self.vis_until):
             print "Generating ", i, "th fig"
             plt.rc('font', size=self.font_size[i])# controls default text sizes
             handle_list = []
@@ -245,7 +248,7 @@ class plotter:
                 if curr_handle[0] == "-1":
                     curr_handle[0] = self.curr_color
                     self.change_color_index("increase")
-                
+
                 handle_list.append(mpatches.Patch(color=curr_handle[0], label=curr_handle[1]))
 
 
@@ -263,9 +266,12 @@ class plotter:
     #and some of the figures do not update, so i had
     #to it with this way. 
     def update_figs(self):
+        idx = 0
         for i in self.fig_list:
-            print i, "th figure updated"
-            i.canvas.draw()
+            if idx < self.vis_until:
+                i.canvas.draw()
+                print idx, "th figure updated"
+                idx += 1
 
         plt.draw()
         plt.pause(0.02)
