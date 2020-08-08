@@ -39,6 +39,7 @@ class plotter:
         self.plot_queue       = []
         self.vis_until        = param['vis_until']
         self.useTex           = param['useTex']
+        self.mode             = param['mode']
 
         self.create_figs()
         self.update_figs()
@@ -198,7 +199,7 @@ class plotter:
 
         kb.set_normal_term()
 
-
+        
 
     def set_event(self,mode,fig):
         if mode == 'onclick-point':
@@ -215,6 +216,7 @@ class plotter:
             Creates the figures with the given parameters
         """
 
+
         if self.useTex == True:
             #Use latex
             rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
@@ -228,8 +230,10 @@ class plotter:
             print "Generating ", i, "th fig"
             plt.rc('font', size=self.font_size[i])# controls default text sizes
             handle_list = []
-
-            curr_fig, curr_axs = plt.subplots(self.nrows[i],self.ncols[i],figsize=self.fig_size[i])
+            subplot_kw = {
+                'projection': self.mode
+            }
+            curr_fig, curr_axs = plt.subplots(self.nrows[i],self.ncols[i],figsize=self.fig_size[i], subplot_kw = subplot_kw)
             curr_fig.canvas.set_window_title(self.window_titles[i])
 
             if self.nrows[i] == 1:
