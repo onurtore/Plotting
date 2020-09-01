@@ -39,7 +39,7 @@ class plotter:
         self.plot_queue       = []
         self.vis_until        = param['vis_until']
         self.useTex           = param['useTex']
-        self.mode             = param['mode']
+        self.mode             = param['mode'] #rectilinear, 3d
 
         self.create_figs()
         self.update_figs()
