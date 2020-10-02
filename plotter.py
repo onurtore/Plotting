@@ -14,6 +14,7 @@ import matplotlib as mpl
 from matplotlib import rc
 from matplotlib.patches import Ellipse
 from non_blocking import *
+from mpl_toolkits.mplot3d import Axes3D
 
 class plotter:
 
