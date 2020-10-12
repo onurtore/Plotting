@@ -33,10 +33,9 @@ class plotter:
         self.ylim             = param["ylim"]
         self.save_fig         = param["save_fig"]
         self.file_names       = param["file_names"]
-        self.handles          = param["handles"]
-        self.color_list       = ['b','g','r','c','m','y','w']
+        self.handles            = param["handles"]
+        self.example_color_list = ['b','g','r','c','m','y','w']
         self.curr_color       = 'b'
-        self.curr_color_index = 0
         self.plot_queue       = []
         self.vis_until        = param['vis_until']
         self.useTex           = param['useTex']
@@ -45,29 +44,9 @@ class plotter:
         self.create_figs()
         self.update_figs()
 
-    def change_color_index(self,op_type,next_color = 0):
-        """
-            A function that do a very little things 
-            with a lot of code...
+    def set_color_index(self,color = 0):
 
-            Why I write it like this only God and time management
-            professionals knows.
-        """
-
-        if op_type == "increase":
-            self.curr_color_index = self.curr_color_index + 1
-            self.curr_color       = self.color_list[self.curr_color_index]
-            if self.curr_color_index == 6:
-                self.curr_color_index = 0
-        if op_type == "decrease":
-            self.curr_color_index = self.curr_color_index - 1
-            self.curr_color       = self.color_list[self.curr_color_index]
-        if op_type == "set":
-            self.curr_color_index = next_color
-            self.curr_color       = self.color_list[self.curr_color_index]
-        if op_type == "reset":
-            self.curr_color_index = 0
-            self.curr_color       = self.color_list[self.curr_color_index]
+        self.curr_color = color
 
     def save_figures(self):
         """
@@ -149,13 +128,32 @@ class plotter:
         #subprocess.call(["bash","-c",'pyIDs=($(pgrep python));for x in "${pyIDs[@]}"; do if [ "$x" -ne '+str(os.getpid())+' ];then  kill -9 "$x"; fi done'])
 
 
-    def point(self,data,fig,ax, color ='b', drawNow = True):
+
+    def point3d(self,data,ax, color='b', drawNow = True,s=3):
         """
             Plots a point to the given axes.
+
+            data: X,Y tuple
+            ax:   just a list consist of [figure_no,axis_no], example: [0,0]
+            color: 
+            drawNow: directly updates graphs
+        """
+        self.ax_list[ax[0]][ax[1]].scatter(data[0],data[1],data[2], c = color,s=s)
+
+        if drawNow == True:
+            self.update_figs()
+
+    def point2d(self,data,ax, color ='b', drawNow = True,s= 3):
+        """
+            Plots a point to the given axes.
+
+            data: X,Y tuple
+            ax:   just a list consist of [figure_no,axis_no], example: [0,0]
+            color: 
+            drawNow: directly updates graphs
         """
 
-
-        ax.scatter(data[0],data[1], c = color)
+        self.ax_list[ax[0]][ax[1]].scatter(data[0],data[1], c = color,s=s)
 
         if drawNow == True:
             self.update_figs()
@@ -167,7 +165,7 @@ class plotter:
         """
 
         for i in range(len(data)):
-            ax.scatter(data[i][0],data[i][1],c = color, s= 1)
+            self.ax_list[ax[0]][ax[1]].scatter(data[i][0],data[i][1],c = color, s= 1)
 
         if drawNow == True:
             self.update_figs()
@@ -178,7 +176,7 @@ class plotter:
             Sets the title for the given axes
         """
 
-        axs.set_title(title)
+        self.ax_list[ax[0]][ax[1]].set_title(title)
 
         if drawNow == True:
             self.update_figs()
@@ -295,3 +293,4 @@ class plotter:
 
         if drawNow == True:
             self.update_figs()
+
