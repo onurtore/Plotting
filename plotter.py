@@ -86,7 +86,7 @@ class plotter:
         """
             Plots the 2 standard deviation error ellipse.
         """
-
+        ax = self.ax_list[ax[0]][ax[1]]
         def eigsorted(cov):
 
             vals, vecs = np.linalg.eigh(cov)
@@ -96,20 +96,26 @@ class plotter:
         vals, vecs = eigsorted(cov)
         theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
 
+
         ls = 'dashed' if dashed else 'solid'
         width, height = 4 * np.sqrt(vals)
 
-        ellipse = Ellipse(xy=pos, width=width, height=height, angle=theta, lw=1, alpha=0.30,
+        ellipse = Ellipse(xy=pos, width=width, height=height, angle=theta, lw=1, alpha=0.90,
                         fill=False, linestyle=ls, color=color)
         ax.add_artist(ellipse)
 
+    def annotate3d(self,ax,text,coordinate,color='black', drawNow = True, size= 1):
+        self.ax_list[ax[0]][ax[1]].text(coordinate[0],coordinate[1],coordinate[2], text, color= color, size=size)
+        if drawNow == True:
+            self.update_figs()
 
-    def annotate(self,ax,text,coordinate,color = 'black',drawNow = True):
+
+    def annotate2d(self,ax,text,coordinate,color = 'black',drawNow = True, size=1 ):
         """
             Annotate the given coordinate point
         """
 
-        ax.annotate(text, coordinate,color=color ,size = 18)
+        self.ax_list[ax[0]][ax[1]].annotate(text, coordinate,color=color ,size = size)
 
         if drawNow == True:
             self.update_figs()
