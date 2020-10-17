@@ -300,3 +300,6 @@ class plotter:
         if drawNow == True:
             self.update_figs()
 
+
+    def normalize_vector(self,x):
+        return x / np.linalg.norm(x)
