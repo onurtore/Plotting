@@ -8,6 +8,7 @@ import pylab as plt
 import numpy as np
 import os
 import subprocess
+import numpy.linalg as linalg
 import matplotlib.patches as mpatches
 import matplotlib as mpl
 
@@ -20,26 +21,29 @@ class plotter:
 
     def __init__(self,param):
 
-        self.nFig             = param["nFig"]
-        self.window_titles    = param["window_titles"]
-        self.nrows            = param["nrows"]
-        self.ncols            = param["ncols"]
-        self.font_size        = param["font_size"]
-        self.fig_size         = param["fig_size"]
-        self.xlabel           = param["xlabel"]
-        self.ylabel           = param["ylabel"]
-        self.axis_titles      = param["axis_titles"]
-        self.xlim             = param["xlim"]
-        self.ylim             = param["ylim"]
-        self.save_fig         = param["save_fig"]
-        self.file_names       = param["file_names"]
+        self.mode               = param['mode'] #rectilinear, 3d
+        self.nFig               = param["nFig"]
+        self.window_titles      = param["window_titles"]
+        self.nrows              = param["nrows"]
+        self.ncols              = param["ncols"]
+        self.font_size          = param["font_size"]
+        self.fig_size           = param["fig_size"]
+        self.xlabel             = param["xlabel"]
+        self.ylabel             = param["ylabel"]
+        self.axis_titles        = param["axis_titles"]
+        self.xlim               = param["xlim"]
+        self.ylim               = param["ylim"]
+        if self.mode == '3d':
+            self.zlim           = param['zlim']
+        self.save_fig           = param["save_fig"]
+        self.file_names         = param["file_names"]
         self.handles            = param["handles"]
         self.example_color_list = ['b','g','r','c','m','y','w']
-        self.curr_color       = 'b'
-        self.plot_queue       = []
-        self.vis_until        = param['vis_until']
-        self.useTex           = param['useTex']
-        self.mode             = param['mode'] #rectilinear, 3d
+        self.curr_color         = 'b'
+        self.plot_queue         = []
+        self.vis_until          = param['vis_until']
+        self.useTex             = param['useTex']
+        self.mode               = param['mode'] #rectilinear, 3d
 
         self.create_figs()
         self.update_figs()
@@ -56,6 +60,29 @@ class plotter:
         for i in range(len(self.fig_list)):
             file_name = self.file_names[i]
             self.fig_list[0].savefig('./' + file_name + '.png')
+
+    def ellipsoid(self, ax, mean, cov, color='black'):
+        # your ellispsoid and center in matrix form
+
+        # find the rotation matrix and radii of the axes
+        U, s, rotation = linalg.svd(cov)
+        radii = 2*np.sqrt(s)
+
+        # now carry on with EOL's answer
+        u = np.linspace(0.0, 2.0 * np.pi, 100)
+        v = np.linspace(0.0, np.pi, 100)
+        x = radii[0] * np.outer(np.cos(u), np.sin(v))
+        y = radii[1] * np.outer(np.sin(u), np.sin(v))
+        z = radii[2] * np.outer(np.ones_like(u), np.cos(v))
+        for i in range(len(x)):
+            for j in range(len(x)):
+                [x[i,j],y[i,j],z[i,j]] = np.dot([x[i,j],y[i,j],z[i,j]], rotation) + mean
+
+        # plot
+        ax = self.ax_list[ax[0]][ax[1]]
+        ax.plot_wireframe(x, y, z,  rstride=4, cstride=4, color=color, alpha=0.2)
+
+
 
 
     def ellipses(self,means,covs,fig,axs,drawNow = True):
@@ -139,7 +166,7 @@ class plotter:
         """
             Plots a point to the given axes.
 
-            data: X,Y tuple
+            data: X,Y,Z tuple
             ax:   just a list consist of [figure_no,axis_no], example: [0,0]
             color: 
             drawNow: directly updates graphs
@@ -251,12 +278,13 @@ class plotter:
                 curr_axs[j].set_ylabel(self.ylabel[i])
                 curr_axs[j].set_xlim(self.xlim[i])
                 curr_axs[j].set_ylim(self.ylim[i])
+                if self.mode == '3d':
+                    curr_axs[j].set_zlim(self.zlim[i])
                 curr_axs[j].set_title(self.axis_titles[ (i * len(curr_axs) ) + j][2])
 
             for curr_handle in self.handles:
                 if curr_handle[0] == "-1":
                     curr_handle[0] = self.curr_color
-                    self.change_color_index("increase")
 
                 handle_list.append(mpatches.Patch(color=curr_handle[0], label=curr_handle[1]))
 
