@@ -41,7 +41,6 @@ class plotter:
         self.example_color_list = ['b','g','r','c','m','y','w']
         self.curr_color         = 'b'
         self.plot_queue         = []
-        self.vis_until          = param['vis_until']
         self.useTex             = param['useTex']
         self.mode               = param['mode'] #rectilinear, 3d
 
@@ -258,7 +257,7 @@ class plotter:
 
         self.fig_list = []
         self.ax_list  = []
-        for i in range(self.vis_until):
+        for i in range(self.nFig):
             print "Generating ", i, "th fig"
             plt.rc('font', size=self.font_size[i])# controls default text sizes
             handle_list = []
@@ -305,10 +304,9 @@ class plotter:
     def update_figs(self):
         idx = 0
         for i in self.fig_list:
-            if idx < self.vis_until:
-                i.canvas.draw()
-                print idx, "th figure updated"
-                idx += 1
+            i.canvas.draw()
+            print idx, "th figure updated"
+            idx += 1
 
         plt.draw()
         plt.pause(0.02)
