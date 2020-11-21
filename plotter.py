@@ -38,7 +38,6 @@ class plotter:
         self.save_fig           = param["save_fig"]
         self.file_names         = param["file_names"]
         self.handles            = param["handles"]
-        self.example_color_list = ['b','g','r','c','m','y','w']
         self.curr_color         = 'b'
         self.plot_queue         = []
         self.useTex             = param['useTex']
@@ -47,7 +46,7 @@ class plotter:
         self.create_figs()
         self.update_figs()
 
-    def set_color_index(self,color = 0):
+    def set_color_index(self,color):
 
         self.curr_color = color
 
@@ -84,12 +83,11 @@ class plotter:
 
 
 
-    def ellipses(self,means,covs,fig,axs,drawNow = True):
+    def plot_error_ellipses(self,means,covs,fig,axs,drawNow = True):
         """
             Wrapper function for drawing multiple ellipses at 
             same time without drawing each of the indivudually
         """
-
 
         for i in range(0, len(means)):
             self.plot_error_ellipse(axs,means[i], covs[i], False)
@@ -109,9 +107,11 @@ class plotter:
         return None
 
     def plot_error_ellipse(self,ax,pos, cov, dashed, color='black'):
+
         """
             Plots the 2 standard deviation error ellipse.
         """
+
         ax = self.ax_list[ax[0]][ax[1]]
         def eigsorted(cov):
 
@@ -131,6 +131,7 @@ class plotter:
         ax.add_artist(ellipse)
 
     def annotate3d(self,ax,text,coordinate,color='black', drawNow = True, size= 1):
+
         self.ax_list[ax[0]][ax[1]].text(coordinate[0],coordinate[1],coordinate[2], text, color= color, size=size)
         if drawNow == True:
             self.update_figs()
@@ -142,7 +143,6 @@ class plotter:
         """
 
         self.ax_list[ax[0]][ax[1]].annotate(text, coordinate,color=color ,size = size)
-
         if drawNow == True:
             self.update_figs()
 
@@ -186,18 +186,6 @@ class plotter:
         """
 
         self.ax_list[ax[0]][ax[1]].scatter(data[0],data[1], c = color,s=s)
-
-        if drawNow == True:
-            self.update_figs()
-
-
-    def points(self,data,fig,ax,color = 'b', drawNow = True):
-        """
-            Plots points for given axes
-        """
-
-        for i in range(len(data)):
-            self.ax_list[ax[0]][ax[1]].scatter(data[i][0],data[i][1],c = color, s= 1)
 
         if drawNow == True:
             self.update_figs()
@@ -310,6 +298,11 @@ class plotter:
         plt.draw()
         plt.pause(0.02)
 
+    def draw_vector3D(self,X,Y,Z,U,V,W, ax,color = 'b', drawNow = True):
+        self.ax_list[ax[0]][ax[1]].quiver(X,Y,Z,U,V,W,color=color)
+
+        if drawNow == True:
+            self.update_figs()
 
     def draw_line(self,data,fig,ax,color = 'b', drawNow = True):
 
@@ -319,8 +312,6 @@ class plotter:
             curr_x = x[i:i+2]
             curr_y = y[i:i+2]
             plt.plot(x[i:i+2], y[i:i+2], color + 'o-')
-
-
 
         if drawNow == True:
             self.update_figs()
