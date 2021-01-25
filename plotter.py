@@ -190,6 +190,12 @@ class plotter:
         if drawNow == True:
             self.update_figs()
 
+    def line2d(self,data,ax,color='b',drawNow = True, s=1):
+
+        self.ax_list[ax[0]][ax[1]].plot(data[0],data[1], linewidth=s, color=color)
+        if drawNow == True:
+            self.update_figs()
+
 
     def set_title(self,axs,title,drawNow = True):
         """
@@ -218,7 +224,12 @@ class plotter:
 
         kb.set_normal_term()
 
-        
+
+    def add_handle(self,axs,color, label):
+        handles, labels = self.ax_list[axs[0]][axs[1]].get_legend_handles_labels()
+        patch = mpatches.Patch(color=color, label=label)
+        handles.append(patch) 
+        self.ax_list[axs[0]][axs[1]].legend(handles=handles)
 
     def set_event(self,mode,fig):
         if mode == 'onclick-point':
