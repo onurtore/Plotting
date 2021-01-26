@@ -103,7 +103,7 @@ class plotter:
             Plots the confidence ellipse 
         """
 
-        print("Not implemented yet")
+        print('Not implemented yet')
         return None
 
     def plot_error_ellipse(self,ax,pos, cov, dashed, color='black'):
@@ -257,7 +257,7 @@ class plotter:
         self.fig_list = []
         self.ax_list  = []
         for i in range(self.nFig):
-            print "Generating ", i, "th fig"
+            print('Generating ', i, 'th fig')
             plt.rc('font', size=self.font_size[i])# controls default text sizes
             handle_list = []
             subplot_kw = {
@@ -304,7 +304,7 @@ class plotter:
         idx = 0
         for i in self.fig_list:
             i.canvas.draw()
-            print idx, "th figure updated"
+            print(idx, 'th figure updated')
             idx += 1
         plt.draw()
         plt.pause(0.02)
