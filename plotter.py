@@ -4,18 +4,17 @@ are responsible for different visualization requirements
 during the DBN operations.
 """
 
-import pylab as plt
 import numpy as np
 import os
 import subprocess
 import numpy.linalg as linalg
 import matplotlib.patches as mpatches
 import matplotlib as mpl
-
 from matplotlib import rc
 from matplotlib.patches import Ellipse
 from non_blocking import *
 from mpl_toolkits.mplot3d import Axes3D
+import pylab as plt
 
 class plotter:
 
@@ -42,7 +41,7 @@ class plotter:
         self.plot_queue         = []
         self.useTex             = param['useTex']
         self.mode               = param['mode'] #rectilinear, 3d
-
+        self.elements           = {}
         self.create_figs()
         self.update_figs()
 
@@ -82,19 +81,6 @@ class plotter:
 
 
 
-
-    def plot_error_ellipses(self,means,covs,fig,axs,drawNow = True):
-        """
-            Wrapper function for drawing multiple ellipses at 
-            same time without drawing each of the indivudually
-        """
-
-        for i in range(0, len(means)):
-            self.plot_error_ellipse(axs,means[i], covs[i], False)
-
-        if drawNow == True:
-            self.update_figs()
-
     def plot_confidence_ellipse(self):
         """
             To-Do
@@ -106,7 +92,7 @@ class plotter:
         print('Not implemented yet')
         return None
 
-    def plot_error_ellipse(self,ax,pos, cov, dashed, color='black'):
+    def plot_error_ellipse(self,ax,pos, cov, dashed, color='black', id = None):
 
         """
             Plots the 2 standard deviation error ellipse.
@@ -128,7 +114,18 @@ class plotter:
 
         ellipse = Ellipse(xy=pos, width=width, height=height, angle=theta, lw=1, alpha=0.90,
                         fill=False, linestyle=ls, color=color)
-        ax.add_artist(ellipse)
+        e = ax.add_artist(ellipse)
+        if self.elements.has_key(id) == False:
+            self.elements[id] = []
+            self.elements[id].append(e)
+        else: 
+            self.elements[id].append(e)
+
+
+    def remove_id(self,id):
+        for i in range(len(self.elements[id])):
+            self.elements[id][i].remove()
+            self.elements[id][i] = None
 
     def annotate3d(self,ax,text,coordinate,color='black', drawNow = True, size= 1):
 
@@ -137,14 +134,22 @@ class plotter:
             self.update_figs()
 
 
-    def annotate2d(self,ax,text,coordinate,color = 'black',drawNow = True, size=1 ):
+    def annotate2d(self,ax,text,coordinate,color = 'black',drawNow = True, size=1, id = None):
         """
             Annotate the given coordinate point
         """
 
-        self.ax_list[ax[0]][ax[1]].annotate(text, coordinate,color=color ,size = size)
+        t = self.ax_list[ax[0]][ax[1]].annotate(text, coordinate,color=color ,size = size)
+        if self.elements.has_key(id) == False:
+            self.elements[id] = []
+            self.elements[id].append(t)
+        else: 
+            self.elements[id].append(t)
+
+
         if drawNow == True:
             self.update_figs()
+
 
     def kill_all_python():
         """
@@ -175,7 +180,7 @@ class plotter:
         if drawNow == True:
             self.update_figs()
 
-    def point2d(self,data,ax, color ='b', drawNow = True,s= 3):
+    def point2d(self,data,ax, color ='b', drawNow = True,size= 3, id = None):
         """
             Plots a point to the given axes.
 
@@ -185,10 +190,17 @@ class plotter:
             drawNow: directly updates graphs
         """
 
-        self.ax_list[ax[0]][ax[1]].scatter(data[0],data[1], c = color,s=s)
+        p = self.ax_list[ax[0]][ax[1]].scatter(data[0],data[1], c = color,s=size)
+        if id != None:
+            if self.elements.has_key(id) == False:
+                self.elements[id] = []
+                self.elements[id].append(p)
+            else: 
+                self.elements[id].append(p)
 
         if drawNow == True:
             self.update_figs()
+
 
     def line2d(self,data,ax,color='b',drawNow = True, s=1):
 
@@ -226,7 +238,10 @@ class plotter:
 
 
     def add_handle(self,axs,color, label):
-        handles, labels = self.ax_list[axs[0]][axs[1]].get_legend_handles_labels()
+        #handles,labels = self.ax_list[axs[0]][axs[1]].get_legend_handles_labels()
+        legend = self.ax_list[axs[0]][axs[1]].get_legend()
+        labels = [] if legend is None else [str(x._text) for x in legend.texts]
+        handles = [] if legend is None else legend.legendHandles
         patch = mpatches.Patch(color=color, label=label)
         handles.append(patch) 
         self.ax_list[axs[0]][axs[1]].legend(handles=handles)
@@ -280,7 +295,7 @@ class plotter:
                     curr_axs[j].set_zlim(self.zlim[i])
                 curr_axs[j].set_title(self.axis_titles[ (i * len(curr_axs) ) + j][2])
 
-            for curr_handle in self.handles:
+            for curr_handle in self.handles[i]:
                 if curr_handle[0] == "-1":
                     curr_handle[0] = self.curr_color
 
@@ -304,6 +319,7 @@ class plotter:
         idx = 0
         for i in self.fig_list:
             i.canvas.draw()
+            i.get_axes()[0].autoscale()
             print(idx, 'th figure updated')
             idx += 1
         plt.draw()
